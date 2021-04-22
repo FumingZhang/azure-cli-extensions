@@ -16,9 +16,7 @@ pip install pytest-json-report pytest-rerunfailures --upgrade
 # pip install pytest-html --upgrade
 
 # check existing az 
-which az || true
-az version || true
-az extension list || true
+which az || az version || az extension list || true
 
 # install latest az
 azdev setup -c azure-cli -r azure-cli-extensions
