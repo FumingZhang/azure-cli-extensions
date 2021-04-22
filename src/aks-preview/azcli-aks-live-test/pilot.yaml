@@ -21,9 +21,11 @@ jobs:
     - bash: |
         pwd
         ls -alh
-        mkdir azure-cli-extensions/
-        ls | grep -v azure-cli-extensions/ | xargs mv -t azure-cli-extensions/
+        mkdir azure-cli-extensions
+        shopt -s dotglob
+        ls | grep -v azure-cli-extensions | xargs mv -t azure-cli-extensions
         mv azure-cli-extensions/src/aks-preview/azcli-aks-live-test/* ./
+        shopt -u dotglob
         ls -alh
       displayName: "Rename"
     - bash: |
