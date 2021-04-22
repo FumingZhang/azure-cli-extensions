@@ -22,12 +22,12 @@ jobs:
         pwd
         ls -alh
         mkdir azure-cli-extensions
-        shopt -s dotglob
-        ls | grep -v azure-cli-extensions | xargs mv -t azure-cli-extensions
+        shopt -s extglob dotglob
+        mv !(azure-cli-extensions) azure-cli-extensions
         mv azure-cli-extensions/src/aks-preview/azcli-aks-live-test/* ./
-        shopt -u dotglob
+        shopt -u extglob dotglob
         ls -alh
-      displayName: "Rename"
+      displayName: "Adjust Repo Directory"
     - bash: |
         pwd
         ./clone_repo.sh
