@@ -2204,6 +2204,8 @@ def aks_upgrade(cmd,    # pylint: disable=unused-argument, too-many-return-state
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
     colorama.init()
+    print(type(client))
+    print(client.api_version)
 
     mc = client.get(resource_group_name, name)
 
