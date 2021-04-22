@@ -1,0 +1,70 @@
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  - fuming-dev-cli-pipeline
+
+# trigger:
+#   branches:
+#     exclude:
+#     - '*'
+
+variables:
+  PYTHON_VERSION: 3.8
+  TEST_MODE: all
+
+jobs:
+- job: LiveTest
+  pool:
+    vmImage: 'ubuntu-16.04'
+  displayName: "Live Test Python ${{ variables.PYTHON_VERSION }}"
+  steps:
+    - bash: |
+        pwd
+        cd devinfra/azcli-aks-live-test/
+        ./clone_repo.sh
+      displayName: "Clone GitHub Repo"
+    - bash: |
+        pwd
+        cd devinfra/azcli-aks-live-test/
+        ./build_image.sh
+      condition: succeeded()
+      displayName: "Build Live Test Image"
+    - bash: |
+        pwd
+        cd devinfra/azcli-aks-live-test/
+        ./start_container.sh
+      env:
+        MAPPED_TEST_SECRET: $(TEST_SECRET)
+        MAPPED_AZCLI_ALT_CLIENT_SECRET: $(AZCLI_ALT_CLIENT_SECRET)
+      condition: succeeded()
+      displayName: "Start Container"
+    - bash: |
+        docker exec "azcli-aks-live-test-container" /opt/setup_venv.sh
+      condition: succeeded()
+      displayName: "Set up Virtual Environment"
+    - bash: |
+        docker exec "azcli-aks-live-test-container" /opt/test_docker.sh
+      condition: succeeded()
+      displayName: "Test Docker"
+    - bash: |
+        docker exec "azcli-aks-live-test-container" /opt/test_cli.sh
+      condition: and(succeeded(), in(variables['COVERAGE'], 'cli', 'all'))
+      displayName: Perform ${{ variables.TEST_MODE }} Test for CLI
+    - bash: |
+        docker exec "azcli-aks-live-test-container" /opt/test_ext.sh
+      condition: and(succeeded(), in(variables['COVERAGE'], 'ext', 'all'))
+      displayName: Perform ${{ variables.TEST_MODE }} Test for EXT
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'devinfra/azcli-aks-live-test/cli_report.json'
+        ArtifactName: 'cli_report.json'
+        publishLocation: 'Container'
+      condition: and(succeededOrFailed(), in(variables['COVERAGE'], 'cli', 'all'))
+      displayName: Publish CLI Test Report
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'devinfra/azcli-aks-live-test/ext_report.json'
+        ArtifactName: 'ext_report.json'
+        publishLocation: 'Container'
+      condition: and(succeededOrFailed(), in(variables['COVERAGE'], 'ext', 'all'))
+      displayName: Publish EXT Test Report

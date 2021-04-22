@@ -1,0 +1,7 @@
+azEnv
+azure-cli
+azure-cli-extensions
+test.sh
+env.list
+*.json
+*.xml
