@@ -3,18 +3,18 @@
 set -eux
 pwd
 
-# clone azure-cli & azure-cli-extensions
-git clone https://github.com/Azure/azure-cli.git
-git clone https://github.com/Azure/azure-cli-extensions.git
-# git clone $REPO
+# clone azure-cli (default is the official repo)
+# git clone https://github.com/Azure/azure-cli.git
+git clone $CLI_REPO
 
-# list branches
+# ckeckout to a specific azure-cli branch (default is the dev branch)
 cd azure-cli/
 git branch -a
+git checkout $CLI_BRANCH
 cd -
+
+# check branch & commit logs
 cd azure-cli-extensions/
 git branch -a
-# git checkout $BRANCH
-git log -5
-cat src/aks-preview/setup.py
+git log -10
 cd -

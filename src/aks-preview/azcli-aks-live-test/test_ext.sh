@@ -21,7 +21,8 @@ azdev extension list | grep "aks-preview" -C 5
 deactivate
 source azEnv/bin/activate
 
-# fix aks-preview unloaded bug
+# Ensure that the command index is updated by calling a specific command in aks-preview, so that all the commands defined in aks-preview are loaded correctly
+# Otherwise, cold boot execution of azdev test may use the api version adopted by the acs command group in azure-cli (which may diverge from the api version used in current aks-preview)
 retry_count=0
 while ! az aks command invoke --help --debug && [[ $retry_count < 3 ]]
 do
@@ -37,7 +38,7 @@ done
 # test ext
 if [[ $TEST_MODE == "record" || $TEST_MODE == "all" ]]; then
     echo "Test in record mode!"
-    azdev test aks-preview --no-exitfirst --xml-path ext_test.xml --discover -a "-n $PARALLELISM --json-report --json-report-file=ext_report.json --reruns 3 --capture=sys" || true
+    azdev test aks-preview --no-exitfirst --xml-path ext_test.xml --discover -a "-n $PARALLELISM --json-report --json-report-file=ext_report.json --reruns 3 --capture=sys"
 fi
 
 if [[ $TEST_MODE == "live" || $TEST_MODE == "all" ]]; then

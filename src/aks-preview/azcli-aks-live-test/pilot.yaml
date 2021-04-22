@@ -21,54 +21,68 @@ jobs:
     - bash: |
         pwd
         ls -alh
-      displayName: "Test PR"
-    # - bash: |
-    #     pwd
-    #     cd azure-cli-extensions/src/aks-preview/azcli-aks-live-test/
-    #     ./clone_repo.sh
-    #   displayName: "Clone GitHub Repo"
-    # - bash: |
-    #     pwd
-    #     cd azure-cli-extensions/src/aks-preview/azcli-aks-live-test/
-    #     ./build_image.sh
-    #   condition: succeeded()
-    #   displayName: "Build Live Test Image"
-    # - bash: |
-    #     pwd
-    #     cd azure-cli-extensions/src/aks-preview/azcli-aks-live-test/
-    #     ./start_container.sh
-    #   env:
-    #     MAPPED_TEST_SECRET: $(TEST_SECRET)
-    #     MAPPED_AZCLI_ALT_CLIENT_SECRET: $(AZCLI_ALT_CLIENT_SECRET)
-    #   condition: succeeded()
-    #   displayName: "Start Container"
-    # - bash: |
-    #     docker exec "azcli-aks-live-test-container" /opt/setup_venv.sh
-    #   condition: succeeded()
-    #   displayName: "Set up Virtual Environment"
-    # - bash: |
-    #     docker exec "azcli-aks-live-test-container" /opt/test_docker.sh
-    #   condition: succeeded()
-    #   displayName: "Test Docker"
-    # - bash: |
-    #     docker exec "azcli-aks-live-test-container" /opt/test_cli.sh
-    #   condition: and(succeeded(), in(variables['COVERAGE'], 'cli', 'all'))
-    #   displayName: Perform ${{ variables.TEST_MODE }} Test for CLI
-    # - bash: |
-    #     docker exec "azcli-aks-live-test-container" /opt/test_ext.sh
-    #   condition: and(succeeded(), in(variables['COVERAGE'], 'ext', 'all'))
-    #   displayName: Perform ${{ variables.TEST_MODE }} Test for EXT
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     PathtoPublish: 'azure-cli-extensions/src/aks-preview/azcli-aks-live-test/cli_report.json'
-    #     ArtifactName: 'cli_report.json'
-    #     publishLocation: 'Container'
-    #   condition: and(succeededOrFailed(), in(variables['COVERAGE'], 'cli', 'all'))
-    #   displayName: Publish CLI Test Report
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     PathtoPublish: 'azure-cli-extensions/src/aks-preview/azcli-aks-live-test/ext_report.json'
-    #     ArtifactName: 'ext_report.json'
-    #     publishLocation: 'Container'
-    #   condition: and(succeededOrFailed(), in(variables['COVERAGE'], 'ext', 'all'))
-    #   displayName: Publish EXT Test Report
+        mkdir azure-cli-extensions/
+        ls | grep -v azure-cli-extensions/ | xargs mv -t azure-cli-extensions/
+        mv azure-cli-extensions/src/aks-preview/azcli-aks-live-test/* ./
+        ls -alh
+      displayName: "Rename"
+    - bash: |
+        pwd
+        ./clone_repo.sh
+      displayName: "Clone GitHub Repo"
+    - bash: |
+        pwd
+        ./build_image.sh
+      condition: succeeded()
+      displayName: "Build Live Test Image"
+    - bash: |
+        pwd
+        ./start_container.sh
+      env:
+        MAPPED_AZCLI_ALT_CLIENT_SECRET: $(AZCLI_ALT_CLIENT_SECRET)
+      condition: succeeded()
+      displayName: "Start Container"
+    - bash: |
+        docker exec "azcli-aks-live-test-container" /opt/setup_venv.sh
+      condition: succeeded()
+      displayName: "Set up Virtual Environment"
+    - bash: |
+        docker exec "azcli-aks-live-test-container" /opt/test_docker.sh
+      condition: succeeded()
+      displayName: "Test Docker"
+    - bash: |
+        docker exec "azcli-aks-live-test-container" /opt/test_cli.sh
+      condition: and(succeeded(), in(variables['COVERAGE'], 'cli', 'all'))
+      displayName: Perform ${{ variables.TEST_MODE }} Test for CLI
+    - bash: |
+        docker exec "azcli-aks-live-test-container" /opt/test_ext.sh
+      condition: and(succeeded(), in(variables['COVERAGE'], 'ext', 'all'))
+      displayName: Perform ${{ variables.TEST_MODE }} Test for EXT
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'cli_report.json'
+        ArtifactName: 'cli_report.json'
+        publishLocation: 'Container'
+      condition: and(succeededOrFailed(), in(variables['COVERAGE'], 'cli', 'all'), in(variables['TEST_MODE'], 'record', 'all'))
+      displayName: Publish CLI Record Test Report
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'cli_live_report.json'
+        ArtifactName: 'cli_live_report.json'
+        publishLocation: 'Container'
+      condition: and(succeededOrFailed(), in(variables['COVERAGE'], 'cli', 'all'), in(variables['TEST_MODE'], 'live', 'all'))
+      displayName: Publish CLI Live Test Report
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'ext_report.json'
+        ArtifactName: 'ext_report.json'
+        publishLocation: 'Container'
+      condition: and(succeededOrFailed(), in(variables['COVERAGE'], 'ext', 'all'), in(variables['TEST_MODE'], 'record', 'all'))
+      displayName: Publish EXT Record Test Report
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'ext_live_report.json'
+        ArtifactName: 'ext_live_report.json'
+        publishLocation: 'Container'
+      condition: and(succeededOrFailed(), in(variables['COVERAGE'], 'cli', 'all'), in(variables['TEST_MODE'], 'live', 'all'))
+      displayName: Publish EXT Live Test Report
