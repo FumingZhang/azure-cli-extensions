@@ -1,22 +1,12 @@
-name: $(Date:yyyyMMdd)$(Rev:.r)
+name: $(Date:yyyyMMdd)$(Rev:.r)_Python$(PYTHON_VERSION)_Coverage:$(COVERAGE)_Mode:$(TEST_MODE)_Branch:$(Build.SourceBranchName)
 
-trigger:
-  - fuming-dev-cli-pipeline
-
-# trigger:
-#   branches:
-#     exclude:
-#     - '*'
-
-variables:
-  PYTHON_VERSION: 3.8
-  TEST_MODE: all
+trigger: none
 
 jobs:
 - job: LiveTest
   pool:
     vmImage: 'ubuntu-16.04'
-  displayName: "Live Test Python ${{ variables.PYTHON_VERSION }}"
+  displayName: "Live Test with Python"
   steps:
     - bash: |
         pwd
@@ -27,18 +17,15 @@ jobs:
         mv azure-cli-extensions/src/aks-preview/azcli-aks-live-test/* ./
         shopt -u extglob dotglob
         ls -alh
-      displayName: "Adjust Repo Directory"
+      displayName: "Adjust the Structure of the Automatic Checkout Directory"
     - bash: |
-        pwd
         ./clone_repo.sh
       displayName: "Clone GitHub Repo"
     - bash: |
-        pwd
         ./build_image.sh
       condition: succeeded()
       displayName: "Build Live Test Image"
     - bash: |
-        pwd
         ./start_container.sh
       env:
         MAPPED_AZCLI_ALT_CLIENT_SECRET: $(AZCLI_ALT_CLIENT_SECRET)
@@ -55,11 +42,11 @@ jobs:
     - bash: |
         docker exec "azcli-aks-live-test-container" /opt/test_cli.sh
       condition: and(succeeded(), in(variables['COVERAGE'], 'cli', 'all'))
-      displayName: Perform ${{ variables.TEST_MODE }} Test for CLI
+      displayName: Perform Test for CLI
     - bash: |
         docker exec "azcli-aks-live-test-container" /opt/test_ext.sh
       condition: and(succeeded(), in(variables['COVERAGE'], 'ext', 'all'))
-      displayName: Perform ${{ variables.TEST_MODE }} Test for EXT
+      displayName: Perform Test for EXT
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: 'cli_report.json'

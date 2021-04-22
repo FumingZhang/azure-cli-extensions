@@ -13,7 +13,17 @@ git branch -a
 git checkout $CLI_BRANCH
 cd -
 
-# check branch & commit logs
+# clone azure-cli-extensions when manually specify the extension repo
+if [[ $MANUAL_EXT == true && -n $EXT_REPO && -n $EXT_BRANCH ]]; then
+    echo "Manually specify the extension repo, delete the current 'azure-cli-extensions' directory!"
+    rm -rf azure-cli-extensions/
+    git clone $EXT_REPO
+    cd azure-cli-extensions/
+    git checkout $EXT_BRANCH
+    cd -
+fi
+
+# check current branch & commit logs in azure-cli-extensions
 cd azure-cli-extensions/
 git branch -a
 git log -10

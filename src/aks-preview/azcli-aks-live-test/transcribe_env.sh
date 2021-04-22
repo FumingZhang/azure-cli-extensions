@@ -13,5 +13,6 @@ echo "TEST_MODE=$TEST_MODE" >> env.list
 echo "PARALLELISM=$PARALLELISM" >> env.list
 echo "CLI_REPO=$CLI_REPO" >> env.list
 echo "CLI_BRANCH=$CLI_BRANCH" >> env.list
+echo "MANUAL_EXT=$MANUAL_EXT" >> env.list
 echo "EXT_REPO=$EXT_REPO" >> env.list
 echo "EXT_BRANCH=$EXT_BRANCH" >> env.list
