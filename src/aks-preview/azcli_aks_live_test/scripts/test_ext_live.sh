@@ -250,6 +250,8 @@ if [[ -n ${BACKWARD_COMPATIBILITY_TEST} ]]; then
         live_options="${pytest_options}${filter_options}${selection_options}"
         live_options+=" -l --json-report-file=bc_live_report.json"
         live_options+=" --xml-file=bc_live_result.xml"
+        # kusto ingestion
+        live_options+=" -in -kp configs/"
         echo "Live test options: ${live_options}"
         test_result=0
         azaks ${live_options} || test_result=$?
