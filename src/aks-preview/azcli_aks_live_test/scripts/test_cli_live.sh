@@ -138,6 +138,7 @@ if [[ ${TEST_MODE} == "live" || ${TEST_MODE} == "all" ]]; then
     live_options+=" --xml-file=cli_live_result.xml"
     # kusto ingestion
     live_options+=" -in -kp configs/"
+    live_options+=" --identity-client-id ${IDENTITY_RESOURCE_ID}"
     echo "Live test options: ${live_options}"
     test_result=0
     azaks ${live_options} || test_result=$?

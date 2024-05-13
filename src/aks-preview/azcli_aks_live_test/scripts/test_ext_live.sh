@@ -252,6 +252,7 @@ if [[ -n ${BACKWARD_COMPATIBILITY_TEST} ]]; then
         live_options+=" --xml-file=bc_live_result.xml"
         # kusto ingestion
         live_options+=" -in -kp configs/"
+        live_options+=" --identity-client-id ${IDENTITY_RESOURCE_ID}"
         echo "Live test options: ${live_options}"
         test_result=0
         azaks ${live_options} || test_result=$?
