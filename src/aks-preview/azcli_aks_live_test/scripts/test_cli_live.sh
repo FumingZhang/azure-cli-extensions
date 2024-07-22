@@ -40,6 +40,8 @@ removeAKSPreview
 az login --identity -u "${IDENTITY_RESOURCE_ID}"
 az account set -s "${AZCLI_ALT_SUBSCRIPTION_ID}"
 az account show
+# update cloud profile
+az cloud update --profile 2020-09-01-hybrid
 
 # prepare running options
 # pytest options
