@@ -18,6 +18,8 @@ setupVenv(){
     python"${PYTHON_VERSION}" -m venv azEnv
     source azEnv/bin/activate
     python -m pip install pip==24.1.2
+    python -m pip show setuptools
+    python -m pip install setuptools==65.5.1
 }
 
 # need to be executed in a venv
