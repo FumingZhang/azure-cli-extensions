@@ -108,6 +108,14 @@ REPO_ROOT="$(cd "${EXT_ROOT}/../.." && pwd)"
 SDK_DIR="${EXT_ROOT}/azext_aks_preview/vendored_sdks/azure_mgmt_preview_aks"
 RECORDINGS_DIR="${EXT_ROOT}/azext_aks_preview/tests/latest/recordings"
 
+# ──────────────────────────── Portable sed -i ────────────────────────────
+# GNU sed uses `sed -i`, BSD/macOS sed requires `sed -i ''`. Detect once.
+if sed --version >/dev/null 2>&1; then
+    SED_INPLACE=(sed -i)
+else
+    SED_INPLACE=(sed -i '')
+fi
+
 # ──────────────────────────── Auto-detect extension version ──────────────
 SETUP_PY="${EXT_ROOT}/setup.py"
 if [[ -z "${OLD_VER}" ]]; then
@@ -287,7 +295,7 @@ if [[ ! -f "${VERSION_FILE}" ]]; then
     echo "ERROR: ${VERSION_FILE} not found"; exit 1
 fi
 # Write the new API version into _version.py so the vendored SDK reflects it
-sed -i '' "s/^VERSION = .*/VERSION = \"${NEW_API}\"/" "${VERSION_FILE}"
+"${SED_INPLACE[@]}" "s/^VERSION = .*/VERSION = \"${NEW_API}\"/" "${VERSION_FILE}"
 echo "    ${VERSION_FILE} → VERSION = \"${NEW_API}\""
 echo ""
 
@@ -300,7 +308,7 @@ echo "    Files to process: ${RECORDING_COUNT}"
 
 find "${RECORDINGS_DIR}" -name '*.yaml' -print0 | \
     xargs -0 -P "$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)" \
-    sed -i '' "s|${OLD_API}|${NEW_API}|g"
+    "${SED_INPLACE[@]}" "s|${OLD_API}|${NEW_API}|g"
 
 echo "    Done."
 echo ""
@@ -311,7 +319,7 @@ echo ">>> Step 4: Updating setup.py, HISTORY.rst, README.rst ..."
 # 4a. setup.py
 SETUP_PY="${EXT_ROOT}/setup.py"
 echo "    setup.py: VERSION ${OLD_VER} → ${NEW_VER}"
-sed -i '' "s/^VERSION = \"${OLD_VER}\"/VERSION = \"${NEW_VER}\"/" "${SETUP_PY}"
+"${SED_INPLACE[@]}" "s/^VERSION = \"${OLD_VER}\"/VERSION = \"${NEW_VER}\"/" "${SETUP_PY}"
 
 # 4b. HISTORY.rst
 HISTORY_RST="${EXT_ROOT}/HISTORY.rst"
